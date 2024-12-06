@@ -1,1 +1,1 @@
-export const API_BASE_URL = 'http://192.168.110.118/php_oop/api';
+export const API_BASE_URL = 'http://192.168.100.53/php_oop/api';

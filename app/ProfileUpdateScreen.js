@@ -1,23 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import {
-  View,
-  Text,
-  TextInput,
-  Button,
-  StyleSheet,
-  Alert,
-  Image,
-} from 'react-native';
+import {View, Text, TextInput, Button, StyleSheet, Alert, Image} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as ImagePicker from 'expo-image-picker';
 import axios from 'axios';
 import { API_BASE_URL } from '../constants/Config';
 
 // Axios interceptor to log requests, good for debugging API requests
-axios.interceptors.request.use(request => {
-    console.log("Request:", request);
-    return request;
-});
+// axios.interceptors.request.use(request => {
+//     console.log("Request:", request);
+//     return request;
+// });
 
 const ProfileUpdateScreen = ({ navigation }) => {
   const [username, setUsername] = useState('');
