@@ -1,74 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { Text, View, TextInput, Button, Alert, StyleSheet } from 'react-native';
-import axios from 'axios';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
-import { API_BASE_URL } from '../constants/Config'; 
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import LoginScreen from './LoginScreen'; // Ensure these are the correct paths to your screens
+import HomeScreen from './HomeScreen';
+import SplashScreen from './SplashScreen'; // Import the SplashScreen component
+import ProfileUpdateScreen from './ProfileUpdateScreen';
 
 const Stack = createStackNavigator();
 
-const LoginScreen = ({ navigation }: any) => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-
-  // Handle login
-  const handleLogin = async () => {
-    try {
-      const response = await axios.post(`${API_BASE_URL}/login`, {
-        email: email,
-        password: password,
-      }, {
-        headers: {
-          'Content-Type': 'application/json', // Send data as JSON
-        }
-      });
-      console.log(response);
-
-      if (response.data.token) {
-        // Store the token in AsyncStorage for persistence
-        await AsyncStorage.setItem('authToken', response.data.token);
-        navigation.navigate('Home');
-      } else {
-        Alert.alert('Login failed', 'Invalid credentials');
-      }
-    } catch (error) {
-      Alert.alert('Error', 'Something went wrong');
-      console.log(error);
-    }
-  };
-
-  return (
-    <View style={styles.container}>
-      <Text>Login</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Email"
-        value={email}
-        onChangeText={setEmail}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Password"
-        secureTextEntry
-        value={password}
-        onChangeText={setPassword}
-      />
-      <Button title="Login" onPress={handleLogin} />
-    </View>
-  );
-};
-
-const HomeScreen = () => {
-  return (
-    <View style={styles.container}>
-      <Text>Welcome to the Home Screen!</Text>
-    </View>
-  );
-};
-
 export default function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [loading, setLoading] = useState(true); // Loading state to show splash screen
 
   useEffect(() => {
     const checkLoginStatus = async () => {
@@ -76,32 +19,44 @@ export default function App() {
       if (token) {
         setIsLoggedIn(true);
       }
+      setLoading(false); // Stop loading after the check is complete
     };
     checkLoginStatus();
   }, []);
 
+  if (loading) {
+    return <SplashScreen />; // Show splash screen while checking login status
+  }
+
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="Login">
-        <Stack.Screen name="Login" component={LoginScreen} />
-        <Stack.Screen name="Home" component={HomeScreen} />
+      <Stack.Navigator
+        initialRouteName={isLoggedIn ? 'Home' : 'Login'} // Dynamically set the initial route
+        screenOptions={{
+          headerBackVisible: false, // Globally disable back button (optional)
+        }}
+      >
+        <Stack.Screen
+          name="Login"
+          component={LoginScreen}
+          options={{
+            headerShown: false, // Optionally hide the header on the login screen
+          }}
+        />
+        <Stack.Screen
+          name="Home"
+          component={HomeScreen}
+          options={{
+            headerLeft: null, // Prevent back navigation on the Home screen
+            gestureEnabled: false, // Disable swipe-to-go-back gesture
+          }}
+        />
+        <Stack.Screen
+          name="ProfileUpdate"
+          component={ProfileUpdateScreen}
+          options={{ title: 'Update Profile' }}
+        />
       </Stack.Navigator>
     </NavigationContainer>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  input: {
-    height: 40,
-    borderColor: 'gray',
-    borderWidth: 1,
-    marginBottom: 10,
-    width: '80%',
-    paddingHorizontal: 10,
-  },
-});
